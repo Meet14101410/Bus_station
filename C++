@@ -1,0 +1,83 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+const int NO_ROUTE = -1;
+
+// Defines a route between two stations
+struct ExpressRoute {
+    std::string destination;
+    int travel_time_minutes;
+};
+
+// Represents a bus station in the express network
+class ExpressStation {
+public:
+    std::string name;
+    std::vector<ExpressRoute> routes;
+
+    ExpressStation(const std::string& station_name) : name(station_name) {}
+
+    void add_route(const std::string& destination, int travel_time) {
+        routes.push_back({destination, travel_time});
+    }
+};
+
+// Manages the entire express bus network
+class ExpressBusNetwork {
+private:
+    std::unordered_map<std::string, ExpressStation> stations;
+
+public:
+    void add_station(const std::string& name) {
+        stations.emplace(name, name);
+    }
+
+    void add_express_route(const std::string& from, const std::string& to, int travel_time) {
+        if (stations.count(from) && stations.count(to)) {
+            stations.at(from).add_route(to, travel_time);
+            stations.at(to).add_route(from, travel_time); // Assume routes are bidirectional
+        }
+    }
+
+    // Calculates travel time for a direct express route
+    int get_travel_time(const std::string& start, const std::string& end) {
+        if (!stations.count(start) || !stations.count(end)) {
+            return NO_ROUTE;
+        }
+        for (const auto& route : stations.at(start).routes) {
+            if (route.destination == end) {
+                return route.travel_time_minutes;
+            }
+        }
+        return NO_ROUTE;
+    }
+};
+
+int main() {
+    ExpressBusNetwork network;
+
+    network.add_station("City Terminal");
+    network.add_station("Airport Hub");
+    network.add_station("Downtown Center");
+    network.add_station("Suburban Plaza");
+
+    network.add_express_route("City Terminal", "Airport Hub", 30);
+    network.add_express_route("City Terminal", "Downtown Center", 20);
+    network.add_express_route("Airport Hub", "Suburban Plaza", 45);
+
+    std::string start = "City Terminal";
+    std::string end = "Airport Hub";
+    int time = network.get_travel_time(start, end);
+
+    if (time != NO_ROUTE) {
+        std::cout << "Direct express travel time from " << start << " to " << end
+                  << " is " << time << " minutes." << std::endl;
+    } else {
+        std::cout << "No direct express route found." << std::endl;
+    }
+
+    return 0;
+}
