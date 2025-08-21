@@ -1,0 +1,88 @@
+import java.util.HashMap;
+import java.util.Map;
+
+// Represents a route from one station to another
+class Route {
+    private String destination;
+    private int travelTimeMinutes;
+
+    public Route(String destination, int travelTimeMinutes) {
+        this.destination = destination;
+        this.travelTimeMinutes = travelTimeMinutes;
+    }
+
+    public int getTravelTimeMinutes() {
+        return travelTimeMinutes;
+    }
+}
+
+// Represents a station in the express network
+class ExpressStation {
+    private String name;
+    private Map<String, Route> routes;
+
+    public ExpressStation(String name) {
+        this.name = name;
+        this.routes = new HashMap<>();
+    }
+
+    public void addRoute(String destination, int travelTime) {
+        routes.put(destination, new Route(destination, travelTime));
+    }
+
+    public Integer getTravelTime(String destination) {
+        Route route = routes.get(destination);
+        return (route != null) ? route.getTravelTimeMinutes() : null;
+    }
+}
+
+// Main class to manage the express bus network
+public class ExpressBusSystem {
+    private Map<String, ExpressStation> stations;
+
+    public ExpressBusSystem() {
+        this.stations = new HashMap<>();
+    }
+
+    public void addStation(String name) {
+        stations.put(name, new ExpressStation(name));
+    }
+
+    public void addExpressRoute(String from, String to, int travelTime) {
+        if (stations.containsKey(from) && stations.containsKey(to)) {
+            stations.get(from).addRoute(to, travelTime);
+            stations.get(to).addRoute(from, travelTime); // Bidirectional
+        }
+    }
+
+    public Integer getTravelTime(String start, String end) {
+        ExpressStation startStation = stations.get(start);
+        if (startStation != null) {
+            return startStation.getTravelTime(end);
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        ExpressBusSystem network = new ExpressBusSystem();
+
+        network.addStation("City Terminal");
+        network.addStation("Airport Hub");
+        network.addStation("Downtown Center");
+        network.addStation("Suburban Plaza");
+
+        network.addExpressRoute("City Terminal", "Airport Hub", 30);
+        network.addExpressRoute("City Terminal", "Downtown Center", 20);
+        network.addExpressRoute("Airport Hub", "Suburban Plaza", 45);
+
+        String start = "City Terminal";
+        String end = "Airport Hub";
+        Integer time = network.getTravelTime(start, end);
+
+        if (time != null) {
+            System.out.println("Direct express bus travel time from " + start + " to " + end + " is " + time + " minutes.");
+        } else {
+            System.out.println("No direct express route found.");
+        }
+    }
+}
